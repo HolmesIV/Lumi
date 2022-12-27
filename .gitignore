@@ -2,6 +2,7 @@
 /Include
 /Lib
 /Scripts
+/__pycache__
 
 # files
 pyenv.cfg
