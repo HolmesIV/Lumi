@@ -12,7 +12,7 @@ columnNames = {
     "BATCH"       : "Batch",
 }
 
-metaDataTitles = ["Request ID", "Requestor", "Requester", "Batch or Lot#", "Recipe Description"]
+metaDataTitles = ["Project", "Request ID", "Requestor", "Requester", "Batch or Lot#", "Recipe Description"]
 
 db_filepath = "C:/Users/Paul.Barron/LumiEnv/Lumi/\
 files/Stability UCQ Lumisizer DSC Formulation Final_NN.xlsx"
@@ -59,32 +59,35 @@ def createDataFrames(batches):
 
 def readDataTable(filepath, column):
     
-    df = pd.read_excel(filepath)
     this_batch = Batch(Path(filepath).parent, Path(filepath).name)
-
-    for i in range(5):
+    df = pd.read_excel(filepath, header = None)
+    
+    for i in range(6):
         item = df.iat[i, 0]
-        value = df.iat[i, column].strip()
+        value = str(df.iat[i, column]).strip()
         if item in metaDataTitles:
             this_batch.meta_data.update({df.iat[i, 0]: value})
 
-    L_df = pd.read_excel(filepath, header = 5)
+    df.iat[5, column] = request_no = this_batch.meta_data["Request ID"]
+    df.columns = df.iloc[5]
+    columns = ["Ingredient", "PLM/GAB/NA Spec #", "Item Desc.", request_no]
+    df = df[columns]
+    df = df.dropna(subset = df.columns[[0,3]])
+    this_batch.df = df
 
-
-    L_df = L_df[["Ingredient", "PLM/GAB/NA Spec #", "Item Desc.", L_df.columns[column]]]
-    L_df = L_df.dropna(subset = L_df.columns[[0, 3]])
-
-    this_batch = Batch(Path(filepath).parent, Path(filepath).name)
-    this_batch.df = L_df
-
+    # print(this_batch, this_batch.path, this_batch.directory, this_batch.name, this_batch.df, this_batch.meta_data, sep = '\n')
     return this_batch
+
+def df_to_csv(batch, directory=False):
+    if not directory:
+        directory = batch.directory
+    batch.df.to_csv(f'{directory}\{batch.meta_data["Request ID"]}.csv')
 
 def main():
     
-    column = 8
-    batch = readDataTable(db_filepath, column)
-
-    batch.df.to_csv(batch.directory)
+    for i in range(7, 26):
+        batch = readDataTable(db_filepath, i)
+        df_to_csv(batch)
 
 if __name__ == '__main__':
     start = time()
