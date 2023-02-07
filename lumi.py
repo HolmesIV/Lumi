@@ -1,9 +1,8 @@
 import pandas as pd
 import numpy as np
 from pathlib import Path
-from math import sqrt
+from config import *
 from lib import objs
-
 
 pd.options.display.width = 10
 
@@ -93,22 +92,16 @@ def generate_NN_table(dataframe):
     
     return nndf
 
-
-
 def main():
-    folder_fp = "C:/Users/Paul.Barron/LumiEnv/Lumi/files/"
-    db_name = "Lumi_DB.xlsx"
-    db_output_name = "db_recipes.xlsx"
-    lims_db_name = "lims_recipe.xls"
+    folder_fp = env_folder + "files/"
 
-    if Path(folder_fp + db_output_name).exists():
-        db_recipe_list = pd.read_excel(folder_fp + db_output_name)
+    if Path(folder_fp + old_datatable_output_filename).exists():
+        db_recipe_list = pd.read_excel(folder_fp + old_datatable_output_filename)
     else:
-        db_recipe_list = database_to_df(folder_fp + db_name)
-        db_recipe_list.to_excel(folder_fp + db_output_name, index=False)
+        db_recipe_list = database_to_df(folder_fp + old_datatable_filename)
+        db_recipe_list.to_excel(folder_fp + old_datatable_output_filename, index=False)
 
-    lims_recipe_list = lims_recipes_to_df(folder_fp + lims_db_name)
-    
+    lims_recipe_list = lims_recipes_to_df(folder_fp + lims_datatable_filename)
     
     if Path(folder_fp + "full_recipe_list.xlsx").exists():
         full_recipe_list = pd.read_excel(folder_fp + "full_recipe_list.xlsx", index_col=0)
@@ -119,7 +112,6 @@ def main():
     
     nndf = generate_NN_table(full_recipe_list)
     nndf.to_excel(folder_fp + "nearest_neighbor.xlsx", sheet_name="NN_List")
-
 
 if __name__ == '__main__':
     main()
