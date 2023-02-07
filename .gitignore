@@ -1,9 +1,12 @@
 # folders
 /Include
-/Lib
 /Scripts
 /__pycache__
+/lib/__pycache__
+/files/__pycache__
+/jupyter
 
 # files
 pyenv.cfg
 *.ipynb
+workbench.py
