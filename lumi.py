@@ -12,8 +12,7 @@ def categorize_ingredient(ingredient):
     for category in objs.reg_dict:
         regex_list = objs.reg_dict[category]
         for regex in regex_list:
-            reg_output = regex.match(ingredient)
-            if reg_output:
+            if regex.match(ingredient):            
                 return category
     return "Undefined"
 
