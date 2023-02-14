@@ -6,8 +6,6 @@ from lib import objs
 
 pd.options.display.width = 10
 
-folder_fp = env_folder + "files/"
-
 def categorize_ingredient(ingredient):
     if type(ingredient) != str:
         return "Undefined"
@@ -113,29 +111,31 @@ def generate_NN_table(nndf):
     nndf = nndf.assign(Distance=lambda x: np.sqrt(x["Delta"])).drop("Delta", axis=1)[["ID", "ID_comp", "Distance"]]
 
     # Export to excel
-    nndf.to_excel(folder_fp + nn_filename, sheet_name="NN_List")
+    nndf.to_excel(files_fp + nn_filename, sheet_name="NN_List")
 
     return nndf
 
 def main():
-    if Path(folder_fp + full_recipe_list_filename).exists():
-        full_recipe_list = pd.read_csv(folder_fp + full_recipe_list_filename, index_col=0, low_memory=False)
+    pd_settings()
+
+    if Path(files_fp + full_recipe_list_filename).exists():
+        full_recipe_list = pd.read_csv(files_fp + full_recipe_list_filename, index_col=0, low_memory=False)
     else:
-        if Path(folder_fp + old_datatable_output_filename).exists():
-            db_recipe_list = pd.read_csv(folder_fp + old_datatable_output_filename)
+        if Path(files_fp + old_datatable_output_filename).exists():
+            db_recipe_list = pd.read_csv(files_fp + old_datatable_output_filename)
         else:
-            db_recipe_list = database_to_df(folder_fp + old_datatable_filename)
-            db_recipe_list.to_csv(folder_fp + old_datatable_output_filename, index=False)
+            db_recipe_list = database_to_df(files_fp + old_datatable_filename)
+            db_recipe_list.to_csv(files_fp + old_datatable_output_filename, index=False)
 
         
-        if Path(folder_fp + lims_recipe_modified).exists():
-            lims_recipe_list = pd.read_csv(folder_fp + lims_recipe_modified)
+        if Path(files_fp + lims_recipe_modified).exists():
+            lims_recipe_list = pd.read_csv(files_fp + lims_recipe_modified)
         else:
-            lims_recipe_list = lims_recipes_to_df(folder_fp + lims_datatable_filename)
-            lims_recipe_list.to_csv(folder_fp + lims_recipe_modified, index=False)
+            lims_recipe_list = lims_recipes_to_df(files_fp + lims_datatable_filename)
+            lims_recipe_list.to_csv(files_fp + lims_recipe_modified, index=False)
 
 
-        full_recipe_list = concat_tables(lims_recipe_list, db_recipe_list, output_file=True, filepath=folder_fp)
+        full_recipe_list = concat_tables(lims_recipe_list, db_recipe_list, output_file=True, filepath=files_fp)
     
     generate_NN_table(full_recipe_list)
 

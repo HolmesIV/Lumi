@@ -10,3 +10,7 @@
 pyenv.cfg
 *.ipynb
 workbench.py
+pd_config.py
+
+# Confidential files
+files/*
