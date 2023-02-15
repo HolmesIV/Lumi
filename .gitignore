@@ -9,8 +9,11 @@
 # files
 pyenv.cfg
 *.ipynb
+*.pbix
 workbench.py
-pd_config.py
+validation.*
+
 
 # Confidential files
-files/*
+files/*.*
+
