@@ -3,6 +3,7 @@ import numpy as np
 from pathlib import Path
 from config import *
 from lib import objs
+from time import time
 
 pd.options.display.width = 10
 
@@ -63,7 +64,15 @@ def lims_recipes_to_df(filepath):
     cols = ["Request", "Batch", "Sample", "Product", "Expected_Batch_Size", "Expected_Batch_Size_Units",
             "Ing_ID", "Ingredient", "Ing_pct", "Ing_Target_Amt", "Ing_Actual_Amt", "Ing_Units",
             ]
-    lims_recipe = pd.read_excel(filepath, header=0)
+    lims_recipe = pd.read_excel(
+                                filepath,
+                                header=0, 
+                                dtype={
+                                    "Ingredient Formula %": np.float64,
+                                    "Ingredient Target Amount": np.float64,
+                                    "Ingredient Actual Amount": np.float64,
+                                    },
+                                )
     lims_recipe.columns = cols
     lims_recipe = lims_recipe[cols[:-3]]
     lims_recipe.dropna(subset=["Ingredient"], inplace=True)
@@ -87,8 +96,6 @@ def concat_tables(lims_table, db_table, output_file=False, filepath=None):
     if output_file and filepath:
         concatted.to_csv(filepath + full_recipe_list_filename)
     
-    print(concatted)
-    
     return concatted
 
 def generate_NN_table(nndf):
@@ -111,33 +118,32 @@ def generate_NN_table(nndf):
     nndf = nndf.assign(Distance=lambda x: np.sqrt(x["Delta"])).drop("Delta", axis=1)[["ID", "ID_comp", "Distance"]]
 
     # Export to excel
-    nndf.to_excel(files_fp + nn_filename, sheet_name="NN_List")
+    nndf.to_csv(files_fp + nn_filename)
 
     return nndf
 
 def main():
     pd_settings()
-
-    if Path(files_fp + full_recipe_list_filename).exists():
-        full_recipe_list = pd.read_csv(files_fp + full_recipe_list_filename, index_col=0, low_memory=False)
+    #i = time()
+    if Path(files_fp + old_datatable_output_filename).exists():
+        db_recipe_list = pd.read_csv(
+                                    files_fp + old_datatable_output_filename,
+                                    dtype = {
+                                        "Ing_pct": np.float64,
+                                    }
+                                )
     else:
-        if Path(files_fp + old_datatable_output_filename).exists():
-            db_recipe_list = pd.read_csv(files_fp + old_datatable_output_filename)
-        else:
-            db_recipe_list = database_to_df(files_fp + old_datatable_filename)
-            db_recipe_list.to_csv(files_fp + old_datatable_output_filename, index=False)
+        db_recipe_list = database_to_df(files_fp + old_datatable_filename)
+        db_recipe_list.to_csv(files_fp + old_datatable_output_filename, index=False)
 
-        
-        if Path(files_fp + lims_recipe_modified).exists():
-            lims_recipe_list = pd.read_csv(files_fp + lims_recipe_modified)
-        else:
-            lims_recipe_list = lims_recipes_to_df(files_fp + lims_datatable_filename)
-            lims_recipe_list.to_csv(files_fp + lims_recipe_modified, index=False)
+    lims_recipe_list = lims_recipes_to_df(files_fp + lims_datatable_filename)
+    lims_recipe_list.to_csv(files_fp + lims_recipe_modified, index=False)
 
-
-        full_recipe_list = concat_tables(lims_recipe_list, db_recipe_list, output_file=True, filepath=files_fp)
-    
+    full_recipe_list = concat_tables(lims_recipe_list, db_recipe_list, output_file=True, filepath=files_fp)
+    #m = time()
     generate_NN_table(full_recipe_list)
+    #e = time()
+    #print(f'Generate NN: {e-m}', f'Total time: {e-i}', sep='\n')
 
 if __name__ == '__main__':
     main()

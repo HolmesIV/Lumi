@@ -7,7 +7,7 @@ old_datatable_output_filename   = "db_recipes.csv"
 lims_datatable_filename         = "lims_recipes.xls"
 lims_recipe_modified            = "lims_recipes_modified.csv"
 full_recipe_list_filename       = "full_recipe_list.csv"
-nn_filename                     = "nearest_neighbor.xlsx"
+nn_filename                     = "nearest_neighbor.csv"
 
 def pd_settings():
     options = {
